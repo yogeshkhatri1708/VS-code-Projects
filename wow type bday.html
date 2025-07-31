@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Divine Birthday Wish for Selina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor */
+        }
+
+        .playfair-font { font-family: 'Playfair Display', serif; }
+
+        /* --- Custom Cursor --- */
+        .cursor {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ff8fab;
+            border-radius: 50%;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s, background-color 0.4s, backdrop-filter 0.4s, border-color 0.4s;
+            z-index: 9999;
+        }
+        .cursor.hover {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 136, 171, 0.1);
+            border: 2px solid rgba(255, 136, 171, 0.5);
+            backdrop-filter: blur(2px);
+        }
+        .cursor.view-mode::after {
+            content: 'VIEW';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #fff;
+        }
+        .cursor-dot {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background-color: #ff8fab;
+            border-radius: 50%;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        /* --- Preloader --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #preloader .letter {
+            font-size: 5vw;
+            font-weight: 700;
+            color: #fff;
+            display: inline-block;
+        }
+
+        /* --- General Section Styling --- */
+        .content-section {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            position: relative;
+        }
+
+        /* --- Hero Section --- */
+        #hero h1 { font-size: clamp(3rem, 10vw, 8rem); line-height: 1; text-align: center; }
+        #hero .line { overflow: hidden; }
+        #hero .line-inner { display: block; }
+        #hero .scroll-indicator { position: absolute; bottom: 2rem; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* --- REIMAGINED: Horizontal Scroll Gallery Section --- */
+        #gallery-intro {
+            height: 100vh;
+        }
+        #gallery-container {
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+            overflow: hidden;
+        }
+        #gallery-track {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 10vw;
+            /* Width will be set by JS */
+        }
+        .gallery-item {
+            flex-shrink: 0;
+            width: 30vw;
+            height: 80vh;
+            margin: 0 2vw;
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .gallery-item:hover {
+            transform: scale(1.02);
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .gallery-item {
+                width: 70vw;
+                height: 70vh;
+                margin: 0 5vw;
+            }
+        }
+        
+        /* --- NEW: Fullscreen Image Viewer --- */
+        #fullscreen-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+        }
+        #fullscreen-viewer img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 0.5rem;
+        }
+        #fullscreen-viewer .close-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* --- Wishes Section --- */
+        #wishes h2 { font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 3rem; }
+        .wish-card {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 300;
+            line-height: 1.4;
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 5rem;
+            opacity: 0.3;
+            transition: opacity 0.4s ease;
+        }
+        .wish-card.active { opacity: 1; }
+
+        /* --- Canvas Background --- */
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <div id="preloader">
+        <div>
+            <span class="letter">S</span><span class="letter">E</span><span class="letter">L</span><span class="letter">I</span><span class="letter">N</span><span class="letter">A</span>
+        </div>
+    </div>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div id="fullscreen-viewer">
+        <div class="close-btn">&times;</div>
+        <img src="" alt="Fullscreen Memory">
+    </div>
+
+    <main id="main-content" class="opacity-0">
+        <!-- Hero Section -->
+        <section id="hero" class="content-section">
+            <h1 class="playfair-font">
+                <div class="line"><span class="line-inner">Happy</span></div>
+                <div class="line"><span class="line-inner">Birthday</span></div>
+                <div class="line"><span class="line-inner text-pink-400">Selina</span></div>
+            </h1>
+            <div class="scroll-indicator">Scroll to Begin</div>
+        </section>
+
+        <!-- Intro Message Section -->
+        <section id="intro" class="content-section">
+            <p class="text-2xl md:text-4xl max-w-4xl text-center leading-relaxed">
+                Today, the world shines a little brighter, because it's celebrating the day you were born. This is a journey through wishes, memories, and magic... just for you.
+            </p>
+        </section>
+
+        <!-- REIMAGINED Gallery Section -->
+        <section id="gallery-intro" class="content-section">
+            <h2 class="text-center text-5xl md:text-7xl playfair-font">Moments Cherished</h2>
+        </section>
+        <section id="gallery-container">
+            <div id="gallery-track">
+                <!-- Images will be injected by JS -->
+            </div>
+        </section>
+
+        <!-- Wishes Section -->
+        <section id="wishes" class="content-section justify-start">
+             <h2 class="playfair-font">Wishes from the Heart</h2>
+             <div class="wishes-wrapper">
+                <div class="wish-card">Wishing you a year that's as brilliant and inspiring as you are.</div>
+                <div class="wish-card">May your path be paved with love, success, and unforgettable moments.</div>
+                <div class="wish-card">Joyeux Anniversaire! Que ta journée soit aussi pétillante que ton esprit.</div>
+                <div class="wish-card">¡Feliz Cumpleaños! Que la vida te regale tanta felicidad como la que tú nos das.</div>
+                <div class="wish-card">Here's to another year of your incredible journey. Make it legendary.</div>
+             </div>
+        </section>
+
+        <!-- Final Message Section -->
+        <section id="final" class="content-section">
+            <h2 class="text-6xl md:text-8xl playfair-font text-center">The World is Yours</h2>
+            <p class="mt-8 text-xl">Happy Birthday, Selina.</p>
+        </section>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- Canvas Particle Background ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const mouse = { x: null, y: null };
+
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = '#ff8fab';
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 100) {
+                    this.x -= dx / 20;
+                    this.y -= dy / 20;
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let particleCount = window.innerWidth > 768 ? 100 : 40;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener('resize', () => {
+            setCanvasSize();
+            initParticles();
+            ScrollTrigger.refresh(); // Refresh ScrollTrigger on resize
+        });
+
+        setCanvasSize();
+        initParticles();
+        animateParticles();
+
+        // --- Custom Cursor ---
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+        
+        gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+        gsap.set(cursorDot, { xPercent: -50, yPercent: -50 });
+
+        window.addEventListener('mousemove', e => {
+            gsap.to(cursor, 0.3, { x: e.clientX, y: e.clientY, ease: "power3.out" });
+            gsap.to(cursorDot, 0.1, { x: e.clientX, y: e.clientY, ease: "power3.out" });
+        });
+        
+        function updateHoverables() {
+             const hoverElements = document.querySelectorAll('a, button, .gallery-item, .close-btn');
+             hoverElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+            });
+        }
+
+        // --- Dynamic Gallery Population ---
+        const galleryTrack = document.getElementById('gallery-track');
+        const images = [
+            'https://placehold.co/600x800/ff8fab/ffffff?text=Joy', 'https://placehold.co/600x800/fb6f92/ffffff?text=Laughter',
+            'https://placehold.co/600x800/ffb3c1/ffffff?text=Adventure', 'https://placehold.co/600x800/f8ad9d/ffffff?text=Serenity',
+            'https://placehold.co/600x800/ffc2d1/ffffff?text=Celebration', 'https://placehold.co/600x800/fce1e4/50223C?text=You',
+            'https://placehold.co/600x800/e5989b/ffffff?text=Dreams', 'https://placehold.co/600x800/d90429/ffffff?text=Passion',
+            'https://placehold.co/600x800/bde0fe/ffffff?text=Peace'
+        ];
+
+        images.forEach(src => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = "A memory of Selina";
+            img.onerror = "this.onerror=null;this.src='https://placehold.co/600x800/cccccc/ffffff?text=Image+Not+Found';";
+            item.appendChild(img);
+            galleryTrack.appendChild(item);
+        });
+        
+        // --- Fullscreen Viewer Logic ---
+        const viewer = document.getElementById('fullscreen-viewer');
+        const fullscreenImg = viewer.querySelector('img');
+        const closeBtn = viewer.querySelector('.close-btn');
+        const galleryItemsForClick = document.querySelectorAll('.gallery-item');
+
+        galleryItemsForClick.forEach(item => {
+            item.addEventListener('click', () => {
+                const imgSrc = item.querySelector('img').src;
+                fullscreenImg.src = imgSrc;
+                gsap.to(viewer, { autoAlpha: 1, duration: 0.5, ease: 'power3.out' });
+                viewer.style.pointerEvents = 'auto';
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            gsap.to(viewer, { autoAlpha: 0, duration: 0.5, ease: 'power3.in' });
+            viewer.style.pointerEvents = 'none';
+        });
+
+        updateHoverables(); // Update after adding all dynamic items
+
+        // --- Animation Timelines ---
+        function initAnimations() {
+            // Preloader Animation
+            const preloaderTl = gsap.timeline({ onComplete: () => document.body.style.overflow = '' });
+            preloaderTl
+                .from("#preloader .letter", { y: 100, opacity: 0, stagger: 0.1, ease: "power3.out", duration: 1 })
+                .to("#preloader .letter", { opacity: 0, stagger: 0.05, ease: "power3.in", duration: 0.5 }, "+=0.5")
+                .to("#preloader", { y: "-100%", ease: "power3.inOut", duration: 1 })
+                .to("#main-content", { opacity: 1, duration: 0.1 }, "-=0.5")
+                .from("#hero .line-inner", { y: "100%", duration: 1, ease: "power4.out", stagger: 0.1 }, "-=0.5")
+                .from("#hero .scroll-indicator", { opacity: 0, y: 20, duration: 1 });
+
+            // Intro Section Animation
+            gsap.from("#intro p", {
+                scrollTrigger: { trigger: "#intro", start: "top 80%", end: "bottom center", toggleActions: "play none none reverse" },
+                opacity: 0, y: 50, duration: 1.5, ease: "power3.out"
+            });
+
+            // --- REIMAGINED Gallery Animation ---
+            // 1. Animate the intro title
+            gsap.from("#gallery-intro h2", {
+                scrollTrigger: { trigger: "#gallery-intro", start: "top 60%", end: "bottom center", scrub: 1 },
+                opacity: 0, y: 100,
+            });
+
+            // 2. Horizontal Scroll
+            const galleryItems = gsap.utils.toArray('.gallery-item');
+            const trackWidth = galleryTrack.scrollWidth;
+            const totalScroll = trackWidth - window.innerWidth;
+            
+            gsap.to(galleryTrack, {
+                x: -totalScroll,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#gallery-container",
+                    pin: true,
+                    scrub: 1.5,
+                    end: () => `+=${totalScroll}`,
+                    onEnter: () => cursor.classList.add('view-mode'),
+                    onLeave: () => cursor.classList.remove('view-mode'),
+                    onEnterBack: () => cursor.classList.add('view-mode'),
+                    onLeaveBack: () => cursor.classList.remove('view-mode'),
+                }
+            });
+            
+            // 3. Parallax and reveal animations for gallery items
+            galleryItems.forEach(item => {
+                const img = item.querySelector('img');
+                // Parallax for the image inside the item
+                gsap.to(img, {
+                    y: "-20%", ease: "none",
+                    scrollTrigger: {
+                        trigger: item, containerAnimation: gsap.getTweensOf(galleryTrack)[0],
+                        start: "left right", end: "right left", scrub: true
+                    }
+                });
+                // 3D rotation effect on scroll
+                gsap.fromTo(item, 
+                    { rotationY: -45, opacity: 0 },
+                    {
+                        rotationY: 0, opacity: 1,
+                        scrollTrigger: {
+                            trigger: item, containerAnimation: gsap.getTweensOf(galleryTrack)[0],
+                            start: "left 80%", end: "left 50%", scrub: true,
+                        }
+                    }
+                );
+                gsap.to(item, {
+                    rotationY: 45,
+                    scrollTrigger: {
+                        trigger: item, containerAnimation: gsap.getTweensOf(galleryTrack)[0],
+                        start: "right 50%", end: "right 20%", scrub: true,
+                    }
+                });
+            });
+
+            // Wishes Section Animation
+            gsap.from("#wishes h2", {
+                scrollTrigger: { trigger: "#wishes", start: "top 80%" },
+                opacity: 0, y: 50, duration: 1
+            });
+
+            ScrollTrigger.create({
+                trigger: ".wishes-wrapper", start: "top top", end: "bottom bottom",
+                pin: true, scrub: 1,
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    const cards = gsap.utils.toArray(".wish-card");
+                    const step = 1 / cards.length;
+                    cards.forEach((card, i) => {
+                        card.classList.toggle("active", progress >= i * step && progress < (i + 1) * step);
+                    });
+                }
+            });
+
+            // Final Section Animation
+            gsap.from("#final h2, #final p", {
+                scrollTrigger: { trigger: "#final", start: "top 80%" },
+                opacity: 0, y: 50, stagger: 0.2, duration: 1.5, ease: "power3.out"
+            });
+        }
+        
+        initAnimations();
+    });
+    </script>
+</body>
+</html>

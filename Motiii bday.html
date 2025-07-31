@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Unforgettable Birthday for Selina!</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;700&family=Caveat&display=swap" rel="stylesheet">
+    
+    <!-- Tone.js for audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+    <style>
+        :root {
+            --pink: #f472b6;
+            --purple: #c084fc;
+            --blue: #60a5fa;
+            --green: #34d399;
+            --yellow: #facc15;
+            --dark-purple: #a855f7;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background-color: #fdf2f8; /* A very light pink */
+        }
+        .font-pacifico { font-family: 'Pacifico', cursive; }
+        .font-caveat { font-family: 'Caveat', cursive; }
+
+        /* --- Advanced Animations & Styles --- */
+        .parallax-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #fbcfe8, #e9d5ff);
+        }
+        .parallax-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+        }
+
+        /* Animated Underline for Section Titles */
+        .title-underline {
+            position: relative;
+            display: inline-block;
+        }
+        .title-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            background-color: var(--pink);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .reveal.visible .title-underline::after {
+            transform: scaleX(1);
+        }
+
+        /* Scroll-triggered fade-in animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Memory Timeline Styles */
+        .timeline-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 2rem 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        .timeline-container::-webkit-scrollbar { height: 8px; }
+        .timeline-container::-webkit-scrollbar-track { background: #e9d5ff; border-radius: 4px; }
+        .timeline-container::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 4px; }
+
+        .timeline-item {
+            flex: 0 0 280px;
+            scroll-snap-align: center;
+            margin: 0 1rem;
+        }
+
+        /* Modal (for timeline and others) */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal.show { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal.show .modal-content { transform: scale(1); }
+
+        /* "Reasons We Love You" Wall */
+        #reasons-list {
+            columns: 2 200px;
+            column-gap: 1rem;
+        }
+        .reason-card {
+            display: inline-block;
+            width: 100%;
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transform-origin: top;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Parallax Elements -->
+    <div class="parallax-container">
+        <div id="confetti-canvas" class="parallax-layer" style="transform: translateZ(-20px) scale(1.2);"></div>
+        <div id="hearts-container" class="parallax-layer" style="transform: translateZ(-10px) scale(1.1);"></div>
+    </div>
+
+    <div class="relative z-10">
+        <!-- Mute Button & Countdown Timer -->
+        <header class="fixed top-0 left-0 w-full p-4 flex justify-between items-center z-50 bg-white/20 backdrop-blur-sm">
+            <div id="countdown" class="text-sm md:text-base text-purple-700 font-semibold"></div>
+            <button id="mute-button" class="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center shadow-lg hover:bg-pink-500 transition-colors">
+                <!-- SVG icon will be injected here -->
+            </button>
+        </header>
+
+        <main class="container mx-auto px-4 pt-24 pb-12">
+
+            <!-- Main Greeting -->
+            <section class="text-center my-12">
+                <h1 class="font-pacifico text-6xl md:text-8xl text-pink-500 drop-shadow-lg">Happy Birthday, Selina!</h1>
+                <p class="text-xl md:text-3xl text-purple-600 mt-4 font-caveat">An unforgettable day for an unforgettable person.</p>
+            </section>
+
+            <!-- AI Wish Generator -->
+            <section class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto my-16 reveal">
+                <h2 class="font-pacifico text-3xl text-center text-purple-500 mb-4"><span class="title-underline">A Wish from the Universe</span></h2>
+                <p class="text-center text-gray-600 mb-4">Describe Selina in a few words (e.g., "kind, funny, adventurous") and let's create a unique wish!</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="ai-prompt" placeholder="e.g., kind, funny, adventurous" class="flex-grow p-3 rounded-lg border-2 border-purple-200 focus:border-pink-400 focus:ring-0 transition">
+                    <button id="generate-wish-btn" class="bg-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-pink-600 transition-all duration-300 transform hover:scale-105">
+                        Generate Wish
+                    </button>
+                </div>
+                <div id="wish-output" class="mt-4 p-4 bg-purple-50 rounded-lg text-gray-700 text-center min-h-[80px] flex items-center justify-center">Click "Generate" to see the magic!</div>
+            </section>
+
+            <!-- Memory Timeline -->
+            <section class="my-20 reveal">
+                <h2 class="font-pacifico text-4xl text-center text-pink-500 mb-8"><span class="title-underline">Our Unforgettable Moments</span></h2>
+                <div id="timeline" class="timeline-container">
+                    <!-- Timeline items will be injected by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Reasons We Love You Wall -->
+            <section class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 max-w-4xl mx-auto my-16 reveal">
+                <h2 class="font-pacifico text-3xl text-center text-purple-500 mb-4"><span class="title-underline">Reasons We Love You</span></h2>
+                <div id="reasons-list" class="mb-6">
+                    <!-- Reasons will be injected by JavaScript -->
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 mt-4">
+                    <input type="text" id="reason-input" placeholder="Add a reason..." class="flex-grow p-3 rounded-lg border-2 border-purple-200 focus:border-pink-400 focus:ring-0 transition">
+                    <button id="add-reason-btn" class="bg-purple-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-600 transition-all duration-300 transform hover:scale-105">
+                        Add to Wall
+                    </button>
+                </div>
+                 <p id="reason-message" class="text-center text-sm text-green-600 mt-2 h-4"></p>
+            </section>
+            
+            <!-- Gift Box -->
+            <section class="text-center my-16 reveal">
+                <h2 class="font-pacifico text-4xl text-center text-purple-500 mb-8"><span class="title-underline">One More Surprise...</span></h2>
+                <!-- Gift box implementation here from previous version, if desired -->
+            </section>
+        </main>
+    </div>
+
+    <!-- Timeline Modal -->
+    <div id="timeline-modal" class="modal">
+        <div class="modal-content text-center">
+            <img id="modal-img" src="" alt="Memory" class="rounded-lg mb-4 w-full h-64 object-cover">
+            <h3 id="modal-title" class="text-2xl font-bold text-purple-600 mb-2"></h3>
+            <p id="modal-description" class="text-gray-700"></p>
+            <button id="modal-close" class="mt-6 bg-pink-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-pink-600 transition-colors">Close</button>
+        </div>
+    </div>
+    
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- IMPORTANT: This configuration is for demonstration purposes. ---
+        // In a real application, you would secure this properly.
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", // Replace with your actual Firebase config
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Reasons We Love You Wall ---
+        const reasonsList = document.getElementById('reasons-list');
+        const reasonInput = document.getElementById('reason-input');
+        const addReasonBtn = document.getElementById('add-reason-btn');
+        const reasonMessage = document.getElementById('reason-message');
+
+        const reasonsCol = collection(db, 'birthday-selina-reasons');
+        
+        // Listen for real-time updates
+        const q = query(reasonsCol); // removed orderBy to avoid index issues
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const reasons = [];
+            snapshot.forEach(doc => {
+                reasons.push({ ...doc.data(), id: doc.id });
+            });
+            // Sort in memory
+            reasons.sort((a, b) => b.createdAt - a.createdAt);
+
+            reasonsList.innerHTML = ''; // Clear list before re-rendering
+            reasons.forEach(reason => {
+                const div = document.createElement('div');
+                div.className = 'reason-card font-caveat text-lg';
+                div.textContent = reason.text;
+                reasonsList.appendChild(div);
+            });
+        });
+
+        addReasonBtn.addEventListener('click', async () => {
+            const text = reasonInput.value.trim();
+            if (text) {
+                await addDoc(reasonsCol, {
+                    text: text,
+                    createdAt: new Date()
+                });
+                reasonInput.value = '';
+                reasonMessage.textContent = 'Thank you for sharing!';
+                setTimeout(() => reasonMessage.textContent = '', 3000);
+            }
+        });
+
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Mute Button & Audio ---
+            const muteButton = document.getElementById('mute-button');
+            const soundOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>`;
+            const soundOffIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l-2.25 2.25M19.5 12l2.25-2.25M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>`;
+            let isMuted = true;
+            muteButton.innerHTML = soundOffIcon;
+
+            const synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "fatsine" },
+                envelope: { attack: 0.2, decay: 0.1, sustain: 0.3, release: 1 }
+            }).toDestination();
+            const melody = new Tone.Sequence((time, note) => {
+                synth.triggerAttackRelease(note, "8n", time);
+            }, ["C4", ["E4", "G4"], "C5", ["E4", "G4"]], "2n");
+            
+            muteButton.addEventListener('click', () => {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    Tone.Transport.stop();
+                    muteButton.innerHTML = soundOffIcon;
+                } else {
+                    Tone.start();
+                    Tone.Transport.start();
+                    melody.start(0);
+                    muteButton.innerHTML = soundOnIcon;
+                }
+            });
+
+            // --- Countdown Timer ---
+            const countdownEl = document.getElementById('countdown');
+            function updateCountdown() {
+                const now = new Date();
+                let nextBirthday = new Date(now.getFullYear(), 8, 15); // Assuming Sep 15
+                if (now > nextBirthday) {
+                    nextBirthday.setFullYear(now.getFullYear() + 1);
+                }
+                const diff = nextBirthday - now;
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                countdownEl.innerHTML = `${d}d ${h}h ${m}m ${s}s until the next celebration!`;
+            }
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+
+            // --- AI Wish Generator ---
+            const generateBtn = document.getElementById('generate-wish-btn');
+            const promptInput = document.getElementById('ai-prompt');
+            const wishOutput = document.getElementById('wish-output');
+
+            generateBtn.addEventListener('click', async () => {
+                const userPrompt = promptInput.value.trim();
+                if (!userPrompt) {
+                    wishOutput.textContent = "Please enter some keywords first!";
+                    return;
+                }
+                wishOutput.textContent = "Thinking of the perfect words...";
+                generateBtn.disabled = true;
+
+                const fullPrompt = `Generate a short, heartfelt, and slightly playful birthday wish for my friend Selina. She is ${userPrompt}. Keep it under 50 words.`;
+                
+                try {
+                    let chatHistory = [{ role: "user", parts: [{ text: fullPrompt }] }];
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // API key will be injected by the environment
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        wishOutput.textContent = text;
+                    } else {
+                        wishOutput.textContent = "Couldn't generate a wish right now. Please try again!";
+                    }
+                } catch (error) {
+                    console.error("AI Wish Generator Error:", error);
+                    wishOutput.textContent = "Something went wrong. Maybe the universe is shy!";
+                } finally {
+                    generateBtn.disabled = false;
+                }
+            });
+
+            // --- Memory Timeline ---
+            const timelineData = [
+                { year: "2021", title: "The Beach Trip", description: "Remember that crazy day we tried to build a giant sandcastle? Best day ever!", image: "https://placehold.co/600x400/60a5fa/ffffff?text=Beach+Trip" },
+                { year: "2022", title: "Concert Night", description: "Singing our hearts out until we lost our voices. An unforgettable night of music and fun.", image: "https://placehold.co/600x400/c084fc/ffffff?text=Concert+Night" },
+                { year: "2023", title: "Mountain Hike", description: "We thought we were lost for a second, but that view from the top was worth it!", image: "https://placehold.co/600x400/34d399/ffffff?text=Mountain+Hike" },
+                { year: "2024", title: "Her Last Birthday", description: "Celebrating another amazing year. So many laughs and so much cake!", image: "https://placehold.co/600x400/f472b6/ffffff?text=Last+Birthday" },
+                { year: "Today", title: "Happy Birthday!", description: "Cheers to you, Selina! Here's to making many more amazing memories together.", image: "https://placehold.co/600x400/facc15/ffffff?text=Happy+Birthday!" }
+            ];
+            const timelineContainer = document.getElementById('timeline');
+            const modal = document.getElementById('timeline-modal');
+            timelineData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item';
+                div.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-lg p-4 text-center cursor-pointer transform hover:scale-105 transition-transform">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-40 object-cover rounded-lg mb-3">
+                        <p class="font-bold text-purple-600">${item.title}</p>
+                        <p class="text-sm text-gray-500">${item.year}</p>
+                    </div>
+                `;
+                div.addEventListener('click', () => {
+                    document.getElementById('modal-img').src = item.image;
+                    document.getElementById('modal-title').textContent = item.title;
+                    document.getElementById('modal-description').textContent = item.description;
+                    modal.classList.add('show');
+                });
+                timelineContainer.appendChild(div);
+            });
+            document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('show'));
+            modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
+
+
+            // --- Scroll-triggered Animations ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.2 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+            // --- Parallax Effect ---
+            const confettiCanvas = document.getElementById('confetti-canvas');
+            const heartsContainer = document.getElementById('hearts-container');
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                confettiCanvas.style.transform = `translateY(${scrollY * 0.3}px)`;
+                heartsContainer.style.transform = `translateY(${scrollY * 0.5}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
