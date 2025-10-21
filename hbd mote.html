@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Selina ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.0.45/dist/lenis.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #1a001a; /* Deep purple */
+            --text-color: #fde2e4; /* Soft pink */
+            --primary-color: #ff85a1; /* Lighter pink */
+            --accent-color: #ff0a54; /* Hot pink */
+        }
+
+        html.lenis { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            /* Set a specific height to enable scrolling */
+            height: 800vh; 
+        }
+
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #content-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .message-scene {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            opacity: 0; /* Initially hidden, controlled by GSAP */
+        }
+        .message-scene > div {
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .ml-letter {
+            display: inline-block;
+            line-height: 1em;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <canvas id="particle-canvas"></canvas>
+
+    <main id="content-container">
+        <section id="scene-1" class="message-scene">
+            <div>
+                <h1 class="text-4xl md:text-6xl font-playfair font-bold ml-title">Happy Birthday,</h1>
+                <h1 class="text-5xl md:text-7xl font-playfair font-bold mt-2 ml-title" style="color: var(--primary-color);">Selina urf My Motiii❤️</h1>
+            </div>
+        </section>
+
+        <section id="scene-2" class="message-scene">
+            <div>
+                <h2 class="text-3xl md:text-5xl font-playfair italic ml-line">Do you know...</h2>
+            </div>
+        </section>
+
+        <section id="scene-3" class="message-scene">
+            <div>
+                <h2 class="text-3xl md:text-5xl font-playfair ml-line">...you're my absolute favorite female friend in entire life?</h2>
+            </div>
+        </section>
+
+        <section id="shayari-scene" class="message-scene">
+            <div>
+                <p class="text-2xl md:text-4xl font-playfair italic ml-line">"Har din tera khaas ho,</p>
+                <p class="text-2xl md:text-4xl font-playfair italic mt-4 ml-line">Sapno se bhara aasman ho,</p>
+                <p class="text-2xl md:text-4xl font-playfair italic mt-4 ml-line">Jo chahe tu, vo tere paas ho,</p>
+                <p class="text-2xl md:text-4xl font-playfair italic mt-4 ml-line">Tera har janmdin kuch khaas ho."</p>
+            </div>
+        </section>
+
+        <section id="scene-4" class="message-scene">
+            <div>
+                <h2 class="text-3xl md:text-5xl font-playfair ml-line">My wish for you is simple:</h2>
+                <p class="text-2xl md:text-4xl mt-4 ml-line" style="color: var(--primary-color);">May your heart always find reasons to smile, even on quiet days.</p>
+            </div>
+        </section>
+        
+        <section id="scene-5" class="message-scene">
+             <div>
+                <h2 class="text-5xl md:text-8xl font-playfair font-bold ml-title">I love you.</h2>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- Smooth Scroll ---
+            const lenis = new Lenis();
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            // --- Particle Background Animation ---
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            const particleCount = 100;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedY = Math.random() * 0.5 + 0.1;
+                    this.speedX = (Math.random() - 0.5) * 0.5;
+                    this.color = `hsla(340, 100%, ${Math.random() * 40 + 60}%, ${Math.random() * 0.5 + 0.5})`;
+                }
+                update() {
+                    this.y -= this.speedY;
+                    this.x += this.speedX;
+                    if (this.y < -10) {
+                        this.y = canvas.height + 10;
+                        this.x = Math.random() * canvas.width;
+                    }
+                    if (this.x < -10 || this.x > canvas.width + 10) {
+                        this.x = Math.random() * canvas.width;
+                        this.y = canvas.height + 10;
+                    }
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                particles = [];
+                initParticles();
+            });
+
+            // --- Scroll-based Text Animations ---
+            
+            // Helper function to split text into letters
+            function splitText(target) {
+                // FIX: Accept an element directly or a selector string
+                const textWrapper = typeof target === 'string' ? document.querySelector(target) : target;
+                if (textWrapper) {
+                    textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='ml-letter'>$&</span>");
+                }
+            }
+
+            const scenes = gsap.utils.toArray('.message-scene');
+            scenes.forEach((scene, i) => {
+                gsap.to(scene, {
+                    opacity: 1,
+                    scrollTrigger: {
+                        trigger: scene,
+                        start: 'top center',
+                        end: 'bottom center',
+                        scrub: true,
+                    }
+                });
+
+                // Unique animation for each scene
+                const titles = scene.querySelectorAll('.ml-title');
+                const line = scene.querySelector('.ml-line');
+                const lines = scene.querySelectorAll('.ml-line');
+
+                if (titles.length > 0) {
+                    titles.forEach(title => splitText(title)); // Pass element directly
+                    const letters = scene.querySelectorAll('.ml-letter');
+                    gsap.from(letters, {
+                        opacity: 0,
+                        y: 80,
+                        rotateZ: -10,
+                        stagger: 0.05,
+                        ease: 'back.out(1.7)',
+                        scrollTrigger: {
+                            trigger: scene,
+                            start: 'top 70%',
+                            toggleActions: 'play none none none'
+                        }
+                    });
+                } else if (lines.length > 1) { // Shayari scene
+                    lines.forEach(l => splitText(l)); // FIX: Pass the element directly
+                    gsap.from(scene.querySelectorAll('.ml-letter'), {
+                        opacity: 0,
+                        scale: 0.5,
+                        stagger: 0.03,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: scene,
+                            start: 'top 70%',
+                            toggleActions: 'play none none none'
+                        }
+                    });
+                } else if (line) {
+                    splitText(line); // Pass element directly
+                    gsap.from(scene.querySelectorAll('.ml-letter'), {
+                        opacity: 0,
+                        stagger: 0.05,
+                        ease: 'power3.inOut',
+                        scrollTrigger: {
+                            trigger: scene,
+                            start: 'top 70%',
+                            toggleActions: 'play none none none'
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
